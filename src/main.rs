@@ -1,7 +1,7 @@
 extern crate colored;
 
-mod java;
+mod lait;
 
 fn main() {
-    println!("Hello, world!");
+  println!("Hello, world!");
 }
