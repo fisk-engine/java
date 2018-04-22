@@ -438,4 +438,37 @@ impl<'p> Parser<'p> {
       )
     }
   }
+
+
+
+  pub fn fold_expression<'v>(expression: &Expression<'v>) -> Result<Expression<'v>, ()> {
+    use self::ExpressionNode::*;
+    use self::Operator::*;
+
+    let node = match expression.node {
+      Binary(ref left, ref op, ref right) => {
+        let node = match (&Self::fold_expression(&*left)?.node, op, &Self::fold_expression(&*right)?.node) {
+          (&Int(ref a),   &Add, &Int(ref b))   => Int(a + b),
+          (&Float(ref a), &Add, &Float(ref b)) => Float(a + b),
+          (&Int(ref a),   &Sub, &Int(ref b))   => Int(a - b),
+          (&Float(ref a), &Sub, &Float(ref b)) => Float(a - b),
+          (&Int(ref a),   &Mul, &Int(ref b))   => Int(a * b),
+          (&Float(ref a), &Mul, &Float(ref b)) => Float(a * b),
+          (&Int(ref a),   &Div, &Int(ref b))   => Int(a / b),
+          (&Float(ref a), &Div, &Float(ref b)) => Float(a / b),
+
+          _ => expression.node.clone()
+        };
+
+        Expression::new(
+          node,
+          expression.pos.clone()
+        )
+      },
+
+      _ => expression.clone()
+    };
+
+    Ok(node)
+  }
 }

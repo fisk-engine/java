@@ -9,12 +9,13 @@ extern crate colored;
 mod lait;
 use lait::lexer::*;
 use lait::parser::*;
+use lait::visitor::*;
+
 use lait::source::Source;
 
 fn main() {
   let content = r"
-foo: int = 10 + 10
-bar := true
+foo: int = false
   ";
 
   let source = Source::from("main.rs/testing.wu", content.lines().map(|x| x.into()).collect::<Vec<String>>());
@@ -35,7 +36,13 @@ bar := true
   let mut parser  = Parser::new(tokens_ref, &source);
 
   match parser.parse() {
-    Ok(ast) => println!("{:#?}", ast),
-    _       => ()
+    Ok(ast) => {
+      println!("{:#?}", ast);
+
+      let mut visitor = Visitor::new(&source, &ast);      
+ 
+      visitor.visit();
+    },
+    _ => ()
   }
 }
